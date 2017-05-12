@@ -7,14 +7,15 @@ import (
 	"fmt"
 	"go/ast"
 	"log"
+	"net/url"
 	"os"
 	"path"
 	"regexp"
 	"runtime"
 	"strings"
 
-	"github.com/yvasiyarov/swagger/markup"
-	"github.com/yvasiyarov/swagger/parser"
+	"github.com/316014408/swagger/markup"
+	"github.com/316014408/swagger/parser"
 )
 
 const (
@@ -22,7 +23,7 @@ const (
 )
 
 var generatedFileTemplate = `
-package main
+package {{packageName}}
 //This file is generated automatically. Do not try to edit it manually.
 
 var resourceListingJson = {{resourceListing}}
@@ -56,7 +57,7 @@ func IsController(funcDeclaration *ast.FuncDecl, controllerClass string) bool {
 	return false
 }
 
-func generateSwaggerDocs(parser *parser.Parser, outputSpec string, pkg bool) error {
+func generateSwaggerDocs(parser *parser.Parser, outputSpec, basePath string, pkg bool) error {
 	fd, err := os.Create(path.Join(outputSpec, "docs.go"))
 	if err != nil {
 		return fmt.Errorf("Can not create document file: %v\n", err)
@@ -84,7 +85,15 @@ func generateSwaggerDocs(parser *parser.Parser, outputSpec string, pkg bool) err
 		doc = strings.Replace(doc, "{{packageName}}", packageName[len(packageName)-1], -1)
 	} else {
 		doc = strings.Replace(generatedFileTemplate, "{{resourceListing}}", "`"+string(parser.GetResourceListingJson())+"`", -1)
+		doc = strings.Replace(doc, "{{.}}", basePath, -1)
 		doc = strings.Replace(doc, "{{apiDescriptions}}", "map[string]string{"+apiDescriptions.String()+"}", -1)
+		packageName := strings.Split(outputSpec, "/")
+		doc = strings.Replace(doc, "{{packageName}}", packageName[len(packageName)-1], -1)
+		u, err := url.Parse(basePath)
+		if err != nil {
+			return fmt.Errorf("Can not create document file: %v\n", err)
+		}
+		doc = strings.Replace(doc, "{{.}}", strings.Join([]string{u.Scheme, "://", u.Host}, ""), -1)
 	}
 
 	fd.WriteString(doc)
@@ -140,8 +149,8 @@ func InitParser(controllerClass, ignore string) *parser.Parser {
 }
 
 type Params struct {
-	ApiPackage, MainApiFile, OutputFormat, OutputSpec, ControllerClass, Ignore, VendoringPath string
-	ContentsTable, Models                                                      bool
+	ApiPackage, MainApiFile, OutputFormat, OutputSpec, ControllerClass, Ignore, VendoringPath, BasePath string
+	ContentsTable, Models                                                                               bool
 }
 
 func Run(params Params) error {
@@ -184,10 +193,10 @@ func Run(params Params) error {
 	format := strings.ToLower(params.OutputFormat)
 	switch format {
 	case "go":
-		err = generateSwaggerDocs(parser, params.OutputSpec, false)
+		err = generateSwaggerDocs(parser, params.OutputSpec, params.BasePath, false)
 		confirmMsg = "Doc file generated"
 	case "gopkg":
-		err = generateSwaggerDocs(parser, params.OutputSpec, true)
+		err = generateSwaggerDocs(parser, params.OutputSpec, "", true)
 		confirmMsg = "Doc package generated"
 	case "asciidoc":
 		err = markup.GenerateMarkup(parser, new(markup.MarkupAsciiDoc), &params.OutputSpec, ".adoc", params.ContentsTable, params.Models)

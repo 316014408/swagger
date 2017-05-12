@@ -4,7 +4,7 @@ import (
 	"flag"
 	"log"
 
-	"github.com/yvasiyarov/swagger/generator"
+	"github.com/316014408/swagger/generator"
 )
 
 var apiPackage = flag.String("apiPackage", "", "The package that implements the API controllers, relative to $GOPATH/src")
@@ -16,6 +16,7 @@ var ignore = flag.String("ignore", "^$", "Ignore packages that satisfy this matc
 var contentsTable = flag.Bool("contentsTable", true, "Generate the section Table of Contents")
 var models = flag.Bool("models", true, "Generate the section models if any defined")
 var vendoringPath = flag.String("vendoringPath", "", "Directory of vendoring if used")
+var basePath = flag.String("basePath", "", "basePath")
 
 func main() {
 	flag.Parse()
@@ -38,7 +39,8 @@ func main() {
 		Ignore:          *ignore,
 		ContentsTable:   *contentsTable,
 		Models:          *models,
-		VendoringPath:	 *vendoringPath,
+		VendoringPath:   *vendoringPath,
+		BasePath:        *basePath,
 	}
 
 	err := generator.Run(params)

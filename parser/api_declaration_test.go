@@ -1,9 +1,9 @@
 package parser_test
 
 import (
+	"github.com/316014408/swagger/parser"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"github.com/yvasiyarov/swagger/parser"
 	"testing"
 )
 

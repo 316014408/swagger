@@ -9,7 +9,7 @@
 package main
 
 import (
-	"github.com/yvasiyarov/swagger/example"
+	"github.com/316014408/swagger/example"
 	"net/http"
 )
 
