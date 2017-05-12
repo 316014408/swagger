@@ -37,7 +37,7 @@ The main difference between this tool and Beego is that this generator doesn't d
 3. Run the Swagger generator.
     Be in the folder with your annotated API source code and run the swagger binary:
 
-    `./$GOPATH/bin/swagger -apiPackage="my_cool_api" -mainApiFile="my_cool_api/web/main.go"` -basePath="http://my.oo/docs"
+    `./$GOPATH/bin/swagger -apiPackage="my_cool_api" -mainApiFile="my_cool_api/web/main.go" -basePath="http://my.oo/docs"`
 
     Command line switches are:
     * **-apiPackage**  - package with API controllers implementation
